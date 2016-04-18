@@ -76,5 +76,12 @@ namespace SharpAiToolkit
                 return result;
             }
         }
+    
+        public static Func<T, TResult> LRUMemoize<T, TResult>(this Func<T, TResult> func, int capacity)
+        {
+            var cache = new LRUCache<T, TResult>(capacity);
+            cache.OnMiss = delegate(T input, out TResult output) { output = func(input); };
+            return t => cache[t];
+        }
     }
 }
