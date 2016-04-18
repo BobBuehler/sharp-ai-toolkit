@@ -4,74 +4,77 @@ using System.Linq;
 using System.Text;
 using System.Collections;
 
-public static class Extensions
+namespace SharpAiToolkit
 {
-    public static void ForEach<T>(this IEnumerable<T> source, Action<T> action)
+    public static class Extensions
     {
-        foreach (var s in source)
+        public static void ForEach<T>(this IEnumerable<T> source, Action<T> action)
         {
-            action(s);
+            foreach (var s in source)
+            {
+                action(s);
+            }
         }
-    }
+        
+        public static T MinByValue<T, K>(this IEnumerable<T> source, Func<T, K> selector)
+        {
+            var comparer = Comparer<T>.Default;
+            
+            var enumerator = source.GetEnumerator();
+            enumerator.MoveNext();
+            
+            var min = enumerator.Current;
+            var minV = selector(min);
+            
+            while (enumerator.MoveNext())
+            {
+                var s = enumerator.Current;
+                var v = selector(s);
+                if (comparer.Compare(v, minV) < 0)
+                {
+                    min = s;
+                    minV = v;
+                }
+            }
+            return min;
+        }
+        
+        public static T MaxByValue<T, K>(this IEnumerable<T> source, Func<T, K> selector)
+        {
+            var comparer = Comparer<T>.Default;
+            
+            var enumerator = source.GetEnumerator();
+            enumerator.MoveNext();
+            
+            var max = enumerator.Current;
+            var maxV = selector(max);
+            
+            while (enumerator.MoveNext())
+            {
+                var s = enumerator.Current;
+                var v = selector(s);
+                if (comparer.Compare(v, maxV) > 0)
+                {
+                    max = s;
+                    maxV = v;
+                }
+            }
+            return max;
+        }
     
-    public static T MinByValue<T, K>(this IEnumerable<T> source, Func<T, K> selector)
-    {
-        var comparer = Comparer<T>.Default;
-        
-        var enumerator = source.GetEnumerator();
-        enumerator.MoveNext();
-        
-        var min = enumerator.Current;
-        var minV = selector(min);
-        
-        while (enumerator.MoveNext())
+        public static Func<T, TResult> Memoize<T, TResult>(this Func<T, TResult> func, IDictionary<T, TResult> cache = null)
         {
-            var s = enumerator.Current;
-            var v = selector(s);
-            if (comparer.Compare(v, minV) < 0)
+            cache = cache ?? new Dictionary<T, TResult>();
+            return t =>
             {
-                min = s;
-                minV = v;
+                TResult result;
+                if (!cache.TryGetValue(t, out result))
+                {
+                    result = func(t);
+                    cache[t] = result;
+                }
+                return result;
             }
-        }
-        return min;
-    }
-    
-    public static T MaxByValue<T, K>(this IEnumerable<T> source, Func<T, K> selector)
-    {
-        var comparer = Comparer<T>.Default;
-        
-        var enumerator = source.GetEnumerator();
-        enumerator.MoveNext();
-        
-        var max = enumerator.Current;
-        var maxV = selector(max);
-        
-        while (enumerator.MoveNext())
-        {
-            var s = enumerator.Current;
-            var v = selector(s);
-            if (comparer.Compare(v, maxV) > 0)
-            {
-                max = s;
-                maxV = v;
-            }
-        }
-        return max;
-    }
-
-    public static Func<T, TResult> Memoize<T, TResult>(this Func<T, TResult> func, Dictionary<T, TResult> cache = null)
-    {
-        cache = cache ?? new Dictionary<T, TResult>();
-        return t =>
-        {
-            TResult result;
-            if (!cache.TryGetValue(t, out result))
-            {
-                result = func(t);
-                cache[t] = result;
-            }
-            return result;
         }
     }
 }
