@@ -61,6 +61,15 @@ namespace SharpAiToolkit
             }
             return max;
         }
+        
+        public static IEnumerable<T> While<T>(this IEnumerable<T> source, Func<T, bool> predicate)
+        {
+            var enumerator = source.GetEnumerator();
+            while (enumerator.MoveNext() && predicate(enumerator.Current))
+            {
+                yield return enumerator.Current;
+            }
+        }
     
         public static Func<T, TResult> Memoize<T, TResult>(this Func<T, TResult> func, IDictionary<T, TResult> cache = null)
         {
