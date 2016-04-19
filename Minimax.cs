@@ -60,7 +60,7 @@ namespace SharpAiToolkit
             return childCalc(node).MaxByValue(child => Step(child, depth - 1, int.MinValue, int.MaxValue, false));
         }
         
-        private int Step(T node, int depth, bool maximizingPlayer, ref int a, ref int b)
+        private int Step(T node, int depth, bool maximizingPlayer, int a, int b)
         {
             if (depth == 0 || isTerminal(node))
             {
@@ -70,14 +70,14 @@ namespace SharpAiToolkit
             if (maximizingPlayer)
             {
                 return childCalc(node)
-                    .Select(child => Step(child, depth - 1, false, ref a, ref, b))
+                    .Select(child => Step(child, depth - 1, false, a, b))
                     .While(h => { a = Math.Max(a, h); return a < b; })
                     .Max();
             }
             else
             {
                 return childCalc(node)
-                    .Select(child => Step(child, depth - 1, true, ref a, ref, b))
+                    .Select(child => Step(child, depth - 1, true, a, b))
                     .While(h => { b = Math.Min(b, h); return a < b; })
                     .Min();
             }
