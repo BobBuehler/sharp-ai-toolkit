@@ -63,8 +63,13 @@ namespace SharpAiToolkit
         
         public TMove Search(TState state, int depth)
         {
+            return Search(state, depth, int.MinValue, int.MaxValue);
+        }
+        
+        public TMove Search(TState state, int depth, bool maximizingPlayer, int a, int b)
+        {
             var cacheValue = stateCache[state];
-            SearchInto(cacheValue, depth, int.MinValue, int.MaxValue, true));
+            SearchInto(cacheValue, depth, maximizingPlayer, a, b));
             return cacheValue.Nexts.MaxByValue(next => stateCache[next.Second].ExpectedFitness).First;
         }
         
