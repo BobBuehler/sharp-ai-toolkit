@@ -6,18 +6,18 @@ using System.Collections;
 
 namespace SharpAiToolkit
 {
-    public interface ISuperMove
+    public interface ISharpMove
     {
     }
     
-    public interface ISuperState<TMove> where TMove : ISuperMove
+    public interface ISharpState<TMove> where TMove : ISharpMove
     {
-        public ISuperState Next(TMove move);
+        public ISharpState Next(TMove move);
     }
     
-    public class SuperCacheValue<TMove, TState>
-        where TMove : ISuperMove
-        where TState : ISuperState<TMove>
+    public class SharpCacheValue<TMove, TState>
+        where TMove : ISharpMove
+        where TState : ISharpState<TMove>
     {
         public TState State;
         public IEnumberable<Tuple<TMove, TState>> Nexts;
@@ -27,7 +27,7 @@ namespace SharpAiToolkit
         public int ExpectedFitness;
         public int ExpectedFitnessDepth;
         
-        SuperCacheValue(TState state)
+        SharpCacheValue(TState state)
         {
             State = state;
             Nexts = null;
@@ -38,14 +38,14 @@ namespace SharpAiToolkit
         }
     }
 
-    public class SuperMinimax<TMove, TState>
-        where TMove : ISuperMove
-        where TState : ISuperState<TMove>
+    public class SharpMinimax<TMove, TState>
+        where TMove : ISharpMove
+        where TState : ISharpState<TMove>
     {
         private Func<TState, bool> isTerminal;
         private Func<TState, int> calcFitness;
         private Func<TState, IEnumerable<TMove>> moveCalc;
-        private LRUCache<TState, SuperCacheValue<TMove, TState>> stateCache;
+        private LRUCache<TState, SharpCacheValue<TMove, TState>> stateCache;
         
         public Minimax(
             Func<TState, bool> isTerminal,
@@ -57,8 +57,8 @@ namespace SharpAiToolkit
             this.calcFitness = calcFitness;
             this.childCalc = childCalc;
             
-            this.stateCache = new LRUCache<TState, SuperCacheValue<TMove, TState>>(cacheCapacity);
-            this.stateCache.OnMiss = state => new SuperCacheValue<TMove, TState>(state);
+            this.stateCache = new LRUCache<TState, SharpCacheValue<TMove, TState>>(cacheCapacity);
+            this.stateCache.OnMiss = state => new SharpCacheValue<TMove, TState>(state);
         }
         
         public TMove Search(TState state, int depth)
@@ -74,7 +74,7 @@ namespace SharpAiToolkit
         }
         
         // Need to document what this is and isn't doing
-        private void SearchInto(SuperCacheValue<TMove, TState> cacheValue, int depth, bool maximizingPlayer, int a, int b)
+        private void SearchInto(SharpCacheValue<TMove, TState> cacheValue, int depth, bool maximizingPlayer, int a, int b)
         {
             if (!cacheValue.IsNew && cacheValue.ExpectedFitnessDepth >= depth)
             {
@@ -111,7 +111,7 @@ namespace SharpAiToolkit
         }
         
         // Putting expected best choices first we can AB prune more frequently
-        private OrderBestFirst(IEnumerable<SuperCacheValue<TMove, TState>> values, bool max)
+        private OrderBestFirst(IEnumerable<SharpCacheValue<TMove, TState>> values, bool max)
         {
             if (max)
             {
@@ -137,7 +137,7 @@ namespace SharpAiToolkit
             return a > b;
         }
         
-        private GetBest(IEnumerable<SuperCacheValue<TMove, TState>> values, bool max)
+        private GetBest(IEnumerable<SharpCacheValue<TMove, TState>> values, bool max)
         {
             if (max)
             {
